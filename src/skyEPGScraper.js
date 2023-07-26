@@ -304,7 +304,7 @@ export default class SkyEPGScraper
             }
         }
 
-        const xmlFormatted = this.xml.end({ pretty: true });
+        const xmlFormatted = this.xml.end({pretty: true});
 
         switch (this.output) {
             case 'gist':
@@ -313,7 +313,7 @@ export default class SkyEPGScraper
                 gist.setToken(process.env.GIST_TOKEN);
 
                 try {
-                    const gistResult = await gist.update(
+                    await gist.update(
                         process.env.GIST_ID,
                         {
                             'files': {
@@ -327,28 +327,28 @@ export default class SkyEPGScraper
                     process.stdout.write(`Done! total execution took ${(new Date().getTime() - startDate.getTime()) * 1000} seconds` + os.EOL);
                 } catch (error) {
                     process.stderr.write(`Not quite sure how this could have happened... ${error}` + os.EOL);
+                }     
+            case 'file':
+                process.stdout.write(`Saving to file...` + os.EOL);
+                const outputDirectory = process.env.OUTPUT_DIRECTORY;
+                const outputFilename = process.env.OUTPUT_FILENAME;
+
+                // Check if the specified directory exists or create it
+                if (!fs.existsSync(outputDirectory)) {
+                    fs.mkdirSync(outputDirectory, {recursive: true});
                 }
-        case 'file':
-        process.stdout.write(`Saving to file...` + os.EOL);
-        const outputDirectory = process.env.OUTPUT_DIRECTORY;
-        const outputFilename = process.env.OUTPUT_FILENAME;
 
-        // Check if the specified directory exists or create it
-        if (!fs.existsSync(outputDirectory)) {
-            fs.mkdirSync(outputDirectory, { recursive: true });
-        }
+                // Combine the output directory and filename to get the full path
+                const outputPath = path.join(outputDirectory, outputFilename);
 
-        // Combine the output directory and filename to get the full path
-        const outputPath = path.join(outputDirectory, outputFilename);
-
-        // Write the XML content to the specified file
-        try {
-            fs.writeFileSync(outputPath, xmlFormatted);
-            process.stdout.write(`Done! XML saved to: ${outputPath}` + os.EOL);
-        } catch (error) {
-            process.stderr.write(`Failed to save XML: ${error}` + os.EOL);
-        }
-        break;
+                // Write the XML content to the specified file
+                try {
+                    fs.writeFileSync(outputPath, xmlFormatted);
+                    process.stdout.write(`Done! XML saved to: ${outputPath}` + os.EOL);
+                } catch (error) {
+                    process.stderr.write(`Failed to save XML: ${error}` + os.EOL);
+                }
+                break;
         }
     }
 }
